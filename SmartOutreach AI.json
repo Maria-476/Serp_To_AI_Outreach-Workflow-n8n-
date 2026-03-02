@@ -1,0 +1,650 @@
+{
+  "name": "SmartOutreach AI",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5585b7d4-b96d-4f40-bd24-967c02807d50",
+              "name": "niche",
+              "value": "Solar panel repair",
+              "type": "string"
+            },
+            {
+              "id": "3bf02f83-1532-4d5e-8b8e-fe65875e9317",
+              "name": "location",
+              "value": "Texas",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5520,
+        -3568
+      ],
+      "id": "8bbed1cd-439a-4163-9838-5f960ac61317",
+      "name": "Global Config"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.location }}{{ $json.niche }}"
+            },
+            {
+              "name": "api_key",
+              "value": "YOUR_SERP_API_KEY"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -5296,
+        -3568
+      ],
+      "id": "7061c809-70de-443b-8fd8-330835b35700",
+      "name": "Search Leads(SerpAPI)",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "organic_results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -5072,
+        -3568
+      ],
+      "id": "6feee411-4024-4f84-b8ae-a48c345c3a4e",
+      "name": "Split leads"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/pagespeedonline/v5/runPagespeed",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.link }}"
+            },
+            {
+              "name": "category",
+              "value": "performance"
+            },
+            {
+              "name": "strategy",
+              "value": "mobile"
+            },
+            {
+              "name": "key",
+              "value": "YOUR_PAGESPEED_API_KEY"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 10000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -4272,
+        -3552
+      ],
+      "id": "4f5087bf-b759-41fb-bef8-b61678ec297a",
+      "name": "Audit Websites(PageSpeed API)",
+      "retryOnFail": false,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b9c56794-c41f-4726-a758-47438d180ca6",
+              "leftValue": "={{ $json.lighthouseResult.categories.performance.score }}",
+              "rightValue": 0.6,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -3952,
+        -3552
+      ],
+      "id": "13813153-5c1e-489d-8bf1-6ff4564f2e05",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are writing on behalf of a web development agency.\n\nWrite a short outreach email.\n\nRules:\n\nUnder 85 words.\n\nSubject + Body.\n\nGreeting: Hi there,\n\nMention performance score {{ $json.Performance_Score }} for {{ $json.Website_Link }}.\n\nExplain briefly that slower load times can affect quote inquiries.\n\nMention that your team specializes in improving website speed for solar companies.\n\nKeep tone professional and confident (not pushy).\n\nEnd with:\n\nBest regards,\nMaria\nPerformance Team\n\nOutput only the final message",
+        "options": {
+          "maxIterations": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -4704,
+        -3088
+      ],
+      "id": "cb8a8d64-936a-4c9b-8e2b-9b250bf13b65",
+      "name": "AI Agent",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fa545ca0-ca63-4c24-98ab-8da060848dea",
+              "name": "Client_Name",
+              "value": "={{ $('Split leads').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "cb697fff-bbcd-4b55-bba7-91c5e4bde1fe",
+              "name": "Website_Link",
+              "value": "={{ $('Audit Websites(PageSpeed API)').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "3a689db1-e08b-4273-a79e-23b11033aa6b",
+              "name": "=Performance_Score",
+              "value": "={{ ($json.lighthouseResult.categories.performance.score * 100).toFixed(0) }}%",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5712,
+        -3088
+      ],
+      "id": "28c79301-ecfd-463d-9003-701aa380e2d9",
+      "name": "Edit Fields(Data Prepration)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a8376eaf-0359-4e91-a397-c47435f0e0b6",
+              "name": "Client_Name",
+              "value": "={{ $('Edit Fields(Data Prepration)').item.json.Client_Name }}",
+              "type": "string"
+            },
+            {
+              "id": "9689756e-fc42-461a-bafc-aabc839cf1e0",
+              "name": "Website_Link",
+              "value": "={{ $('Edit Fields(Data Prepration)').item.json.Website_Link\n.replace(/^https?:\\/\\//, '')\n.replace(/\\/$/, '')\n.toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "985498b7-3236-42b4-9477-4834479e8326",
+              "name": "Performance_Score",
+              "value": "={{ $('Edit Fields(Data Prepration)').item.json.Performance_Score }}",
+              "type": "string"
+            },
+            {
+              "id": "94435d7c-e9b4-47e5-94ff-dd3b7471f2c9",
+              "name": "Target_Email",
+              "value": "={{ $json.emails[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "d33917cf-ed9a-4b8e-8bf2-18edfcdb93ba",
+              "name": "linkedIn_URL",
+              "value": "={{ $json.linkedIns[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5008,
+        -3088
+      ],
+      "id": "6758007c-6ed2-4bf1-bc8e-acf39ea67ef3",
+      "name": "Edit Fields(Final List)"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorId": {
+          "__rl": true,
+          "value": "8CUaIL6Ck8d7gDbck",
+          "mode": "list",
+          "cachedResultName": "Website Contact Extractor (betterdevsscrape/contact-details-extractor)",
+          "cachedResultUrl": "https://console.apify.com/actors/8CUaIL6Ck8d7gDbck/input"
+        },
+        "customBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"{{ $json.Website_Link }}\"\n    }\n  ],\n  \"maxRequestsPerStartUrl\": 5,\n  \"maxDepth\": 1\n}",
+        "timeout": 300
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -5392,
+        -3088
+      ],
+      "id": "1c38b058-e7df-4e50-bbab-e54eceb20a91",
+      "name": "Apify(Run an Actor and get dataset)",
+      "credentials": {
+        "apifyApi": {
+          "id": "6YKNGJ8Un0jNaaQs",
+          "name": "Apify account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -4848,
+        -3568
+      ],
+      "id": "435de849-d95d-4483-ae8b-d2d5809b0889",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 250,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -4928,
+        -2848
+      ],
+      "id": "021e7246-d22f-4c6f-a9a2-cc521f1cb5ed",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lhTPRy9dXwDyVJUg",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -4592,
+        -3552
+      ],
+      "id": "b9cb925e-c57d-44df-8353-71f1402e5ae2",
+      "name": "Wait",
+      "webhookId": "91acaa70-b494-4922-b1fb-9504ff4d46ca"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1fCX2boEMPOqaPj6MLdsVsYQYlQE4Ua3i3EDnPndX9z0",
+          "mode": "list",
+          "cachedResultName": "Lead Research Final Output",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fCX2boEMPOqaPj6MLdsVsYQYlQE4Ua3i3EDnPndX9z0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fCX2boEMPOqaPj6MLdsVsYQYlQE4Ua3i3EDnPndX9z0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client_Name": "={{ $('Edit Fields(Final List)').item.json.Client_Name }}",
+            "Website_Link": "={{ $('Edit Fields(Final List)').item.json.Website_Link }}",
+            "Performance_Score": "={{ $('Edit Fields(Final List)').item.json.Performance_Score }}",
+            "Target_Email": "={{ $('Edit Fields(Final List)').item.json.Target_Email }}",
+            "linkedIn_URL": "={{ $('Edit Fields(Final List)').item.json.linkedIn_URL }}",
+            "AI_Message": "={{ $node[\"AI Agent\"].json[\"output\"] }}"
+          },
+          "matchingColumns": [
+            "Website_Link"
+          ],
+          "schema": [
+            {
+              "id": "Client_Name",
+              "displayName": "Client_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website_Link",
+              "displayName": "Website_Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Performance_Score",
+              "displayName": "Performance_Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Target_Email",
+              "displayName": "Target_Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedIn_URL",
+              "displayName": "linkedIn_URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI_Message",
+              "displayName": "AI_Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4240,
+        -3088
+      ],
+      "id": "11e863b1-00cc-4992-915e-d0b2dc7b24d8",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bfE5uTgpcm2qQyf0",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtDayOfMonth": 28,
+              "triggerAtHour": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -5744,
+        -3568
+      ],
+      "id": "9da8603d-348f-4889-a31c-55125eddc598",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Global Config": {
+      "main": [
+        [
+          {
+            "node": "Search Leads(SerpAPI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Leads(SerpAPI)": {
+      "main": [
+        [
+          {
+            "node": "Split leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split leads": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audit Websites(PageSpeed API)": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields(Data Prepration)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields(Data Prepration)": {
+      "main": [
+        [
+          {
+            "node": "Apify(Run an Actor and get dataset)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields(Final List)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apify(Run an Actor and get dataset)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields(Final List)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Audit Websites(PageSpeed API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Global Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "275fce91-f994-4f57-9e40-46d2c4308d5d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "439710dd82164804590211dad351a6e24742bc8c02a647ace24c9faf95a056ad"
+  },
+  "id": "xVP5ywxc1LNAhuhr",
+  "tags": []
+}
