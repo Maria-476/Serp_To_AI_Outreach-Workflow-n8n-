@@ -1,104 +1,56 @@
-**AI Lead Generation Automation**
 
-Automated lead prospecting system using SerpAPI, PageSpeed Insights, Apify, and OpenAI with normalized data handling and upsert-based duplicate protection.
+# B2B AI Lead Generation & Outreach Automation
 
-🚀 Overview
+## 📌 Project Overview
 
-This project is an end-to-end automated lead generation workflow built in n8n.
+This project is an automated B2B lead generation and outreach system built in n8n. It is designed specifically for Web Development Agencies to find potential clients who have slow or poorly optimized websites.
 
-It:
+The workflow automatically searches for local businesses, extracts their contact details, audits their website speed in real-time, and uses an AI Agent to write highly personalized cold email drafts based on their actual performance scores.
 
-Searches business leads via SerpAPI
+**Niche Adaptability:** Currently, the Global Configuration is set to target **Solar Panel Companies**. However, this system is highly adaptable and can be used for any service-based business where website performance is crucial for acquiring customers, such as:
 
-Audits website performance using Google PageSpeed Insights
+* Plumbing Services
+* Roofing Contractors
+* HVAC (Heating and Cooling) Companies
+* Landscaping Services
+* Real Estate Agencies
+* Law Firms
 
-Extracts additional data using Apify
+---
 
-Generates personalized outreach content using OpenAI
+## ⚙️ Technical Architecture
 
-Stores structured data in Google Sheets
+The system is built using n8n and integrates multiple external APIs. Here is the step-by-step node architecture:
 
-Prevents duplicates using normalized URLs and Upsert logic
+* **Trigger Nodes (Form / Schedule):** Initiates the workflow either manually via a web form interface or automatically on a daily schedule.
+* **Global Config:** A manual setup node to define the target niche and search parameters dynamically.
+* **SerpAPI (Google Search):** Fetches the top-ranking local businesses based on the configured keyword (e.g., "Solar repairs in Texas").
+* **Split & Loop Nodes:** Processes the fetched data individually to ensure accurate data handling and avoid API timeouts.
+* **Apify (Web Scraper):** Visits the target websites to extract public contact information, primarily email addresses.
+* **Google PageSpeed Insights API:** Audits the target website's performance and retrieves the mobile/desktop load speed scores.
+* **Filter (Low Performance):** Acts as a business logic gate, passing only the leads whose website score falls below a certain threshold (e.g., < 60%), identifying them as prime prospects for web development services.
+* **AI Agent (OpenAI Chat Model):** Takes the live performance score and target niche to write a hyper-personalized, context-aware email draft explaining how a faster website can improve their specific business.
+* **Google Sheets (Append/Update):** Logs the processed leads for record-keeping and automatically deduplicates entries to avoid spamming the same company.
+* **Filter (Email Exists):** A fail-proof node that ensures only leads with successfully scraped email addresses move to the final stage.
+* **Gmail (Create Draft):** Automatically generates ready-to-send emails in the user's Gmail Drafts folder.
 
-Designed as a production-ready portfolio automation project with cost control and scalable architecture.
+---
 
-🧠 Key Features
+## 💼 Business Value
 
-Automated lead search by keyword & location
+This workflow operates as a "Lead-Generation as a Service" product.
 
-URL normalization (removes http/https, trailing slash, lowercase conversion)
+* **Hyper-Personalization:** Instead of sending generic spam, the outreach is based on a real, live audit of the prospect's website, drastically increasing the open and reply rates.
+* **Time Efficiency:** It reduces manual prospecting, data entry, and email drafting time by over 95%.
+* **Cost-Effective:** By keeping the output as "Drafts," the agency owner retains full control to review the emails before sending, ensuring quality assurance without manual effort.
 
-Duplicate-safe storage using Upsert (match on Website_Link)
+---
 
-Website performance filtering
+## 🚀 Scalability & Future Improvements
 
-AI-generated personalized outreach message
+While this is a fully functional Proof of Concept (MVP), the architecture is designed to scale. For a dedicated client, the following features can be added:
 
-Cost-optimized execution (limited batch processing)
-
-Schedule-based automation support
-
-⚙️ Tech Stack
-
-n8n (workflow automation)
-
-SerpAPI (lead search)
-
-Google PageSpeed Insights API
-
-Apify (data extraction)
-
-OpenAI API (message generation)
-
-Google Sheets (data storage)
-
-📂 Workflow Architecture
-
-Trigger
-→ Lead Search
-→ Split & Batch Processing
-→ Website Audit
-→ Data Enrichment
-→ AI Personalization
-→ Data Normalization
-→ Append or Update (Upsert) in Google Sheets
-
-🔐 Setup Instructions
-
-Before running this workflow:
-
-Add your own SerpAPI key
-
-Add your own Google PageSpeed API key
-
-Add your own OpenAI API key
-
-Add your own Apify API key
-
-Connect Google Sheets credentials
-
-API keys are not included for security reasons.
-
-📌 Production Notes
-
-Duplicate protection implemented using normalized Website_Link field
-
-Designed with cost optimization in mind
-
-Schedule trigger supported for live automation
-
-Safe for scaling to higher lead volumes
-
-🎯 Purpose
-
-This project was built as a portfolio demonstration of:
-
-Automation system design
-
-AI integration
-
-API orchestration
-
-Data normalization
-
-Production-ready workflow thinking
+1. **Automated Keyword Rotation:** Connecting a Google Sheet as a master list of keywords/cities. The system will automatically pick a new keyword every day, running continuously without human intervention.
+2. **CRM Integration:** Replacing or supplementing Google Sheets with direct integrations to CRMs like HubSpot, GoHighLevel, or Pipedrive to create automated sales deals.
+3. **Instant Notifications:** Adding Slack or Telegram nodes to alert the sales team instantly when a highly qualified lead (e.g., extremely low performance score) is found.
+4. **Automated Follow-ups:** Expanding the Gmail logic to send the email directly and setting up a delayed trigger to automatically send a follow-up email if the prospect does not reply within 3 days.
