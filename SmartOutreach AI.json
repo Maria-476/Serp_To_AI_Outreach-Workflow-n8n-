@@ -24,8 +24,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -5520,
-        -3568
+        -8336,
+        -6528
       ],
       "id": "8bbed1cd-439a-4163-9838-5f960ac61317",
       "name": "Global Config"
@@ -42,11 +42,11 @@
             },
             {
               "name": "q",
-              "value": "={{ $json.location }}{{ $json.niche }}"
+              "value": "={{ $json.location }}{{ $json.niche }"
             },
             {
               "name": "api_key",
-              "value": "YOUR_SERP_API_KEY"
+              "value": "YOUR_API_KEY_HERE"
             }
           ]
         },
@@ -59,8 +59,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -5296,
-        -3568
+        -8080,
+        -6528
       ],
       "id": "7061c809-70de-443b-8fd8-330835b35700",
       "name": "Search Leads(SerpAPI)",
@@ -74,8 +74,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        -5072,
-        -3568
+        -7792,
+        -6528
       ],
       "id": "6feee411-4024-4f84-b8ae-a48c345c3a4e",
       "name": "Split leads"
@@ -100,7 +100,7 @@
             },
             {
               "name": "key",
-              "value": "YOUR_PAGESPEED_API_KEY"
+              "value": "YOUR_API_KEY_HERE"
             }
           ]
         },
@@ -116,8 +116,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -4272,
-        -3552
+        -6992,
+        -6512
       ],
       "id": "4f5087bf-b759-41fb-bef8-b61678ec297a",
       "name": "Audit Websites(PageSpeed API)",
@@ -127,41 +127,8 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "b9c56794-c41f-4726-a758-47438d180ca6",
-              "leftValue": "={{ $json.lighthouseResult.categories.performance.score }}",
-              "rightValue": 0.6,
-              "operator": {
-                "type": "number",
-                "operation": "lt"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
-      "position": [
-        -3952,
-        -3552
-      ],
-      "id": "13813153-5c1e-489d-8bf1-6ff4564f2e05",
-      "name": "Filter"
-    },
-    {
-      "parameters": {
         "promptType": "define",
-        "text": "=You are writing on behalf of a web development agency.\n\nWrite a short outreach email.\n\nRules:\n\nUnder 85 words.\n\nSubject + Body.\n\nGreeting: Hi there,\n\nMention performance score {{ $json.Performance_Score }} for {{ $json.Website_Link }}.\n\nExplain briefly that slower load times can affect quote inquiries.\n\nMention that your team specializes in improving website speed for solar companies.\n\nKeep tone professional and confident (not pushy).\n\nEnd with:\n\nBest regards,\nMaria\nPerformance Team\n\nOutput only the final message",
+        "text": "=You are writing on behalf of a web development agency.\nWrite a short outreach email body.\n\nRules:\n\nUpto 85 words.\n\nSTRICTLY output ONLY the email body. Do NOT write a subject line, and do NOT include the word \"Subject:\".\n\nGreeting: \"Hi Team at {{ $json.Website_Link }},\" (Do not use generic greetings like \"Hi there\").\n\nMention the performance score {{ $json.Performance_Score }} for {{ $json.Website_Link }}.\n\nExplain briefly that slower load times can affect quote inquiries.\n\nMention that your team specializes in improving website speed for solar companies.\n\nKeep tone professional and confident (not pushy).\n\nEnd with:\nBest regards,\n[Sender Name]\n[Sender Company]\n\nOutput ONLY the final email text without any extra conversational text or formatting",
         "options": {
           "maxIterations": 1
         }
@@ -169,8 +136,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -4704,
-        -3088
+        -7664,
+        -6000
       ],
       "id": "cb8a8d64-936a-4c9b-8e2b-9b250bf13b65",
       "name": "AI Agent",
@@ -206,8 +173,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -5712,
-        -3088
+        -8432,
+        -6000
       ],
       "id": "28c79301-ecfd-463d-9003-701aa380e2d9",
       "name": "Edit Fields(Data Prepration)"
@@ -253,8 +220,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -5008,
-        -3088
+        -7936,
+        -6000
       ],
       "id": "6758007c-6ed2-4bf1-bc8e-acf39ea67ef3",
       "name": "Edit Fields(Final List)"
@@ -275,8 +242,8 @@
       "type": "@apify/n8n-nodes-apify.apify",
       "typeVersion": 1,
       "position": [
-        -5392,
-        -3088
+        -8192,
+        -6000
       ],
       "id": "1c38b058-e7df-4e50-bbab-e54eceb20a91",
       "name": "Apify(Run an Actor and get dataset)",
@@ -295,8 +262,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -4848,
-        -3568
+        -7536,
+        -6528
       ],
       "id": "435de849-d95d-4483-ae8b-d2d5809b0889",
       "name": "Loop Over Items"
@@ -318,8 +285,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        -4928,
-        -2848
+        -7792,
+        -5840
       ],
       "id": "021e7246-d22f-4c6f-a9a2-cc521f1cb5ed",
       "name": "OpenAI Chat Model",
@@ -335,8 +302,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -4592,
-        -3552
+        -7248,
+        -6512
       ],
       "id": "b9cb925e-c57d-44df-8353-71f1402e5ae2",
       "name": "Wait",
@@ -437,8 +404,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        -4240,
-        -3088
+        -7248,
+        -6000
       ],
       "id": "11e863b1-00cc-4992-915e-d0b2dc7b24d8",
       "name": "Append or update row in sheet",
@@ -464,11 +431,126 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -5744,
-        -3568
+        -8624,
+        -6416
       ],
       "id": "9da8603d-348f-4889-a31c-55125eddc598",
       "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Quick question about {{ $json.Website_Link }}",
+        "message": "={{ $json.AI_Message }}",
+        "options": {
+          "sendTo": "={{ $json.Target_Email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -6688,
+        -6000
+      ],
+      "id": "2d5f9519-fd25-4fae-9628-ae83eaaeb52c",
+      "name": "Create a draft",
+      "webhookId": "3c08ca49-27cb-48d5-8c97-82b2094b1f4b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "d91ZqenFsBAW3WTu",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "B2B AI Lead Generation & Outreach",
+        "formDescription": "Welcome to the B2B Lead-Gen Automation system. Clicking 'Submit' will trigger the live AI workflow to fetch target businesses, audit their website load speeds via Google PageSpeed API, scrap contact details using apify APIs and generate personalized outreach email drafts based on their performance scores",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Reviewer Name (Optional)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -8624,
+        -6608
+      ],
+      "id": "8b2f79ed-3727-4caa-ace6-9a1dc54b628b",
+      "name": "On form submission",
+      "webhookId": "c86c05fa-83bf-466a-a00d-5cf996cfd0ee"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cd651501-8ef5-4549-9bb6-d0e935df78e8",
+              "leftValue": "={{ $json.Target_Email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -6992,
+        -6000
+      ],
+      "id": "2f1c90ab-afe0-4386-9333-868a6872f0d7",
+      "name": "Email Exists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b9c56794-c41f-4726-a758-47438d180ca6",
+              "leftValue": "={{ $json.lighthouseResult.categories.performance.score }}",
+              "rightValue": 0.6,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -6752,
+        -6512
+      ],
+      "id": "13813153-5c1e-489d-8bf1-6ff4564f2e05",
+      "name": "Filter: Low Performance"
     }
   ],
   "pinData": {},
@@ -510,18 +592,7 @@
       "main": [
         [
           {
-            "node": "Filter",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filter": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields(Data Prepration)",
+            "node": "Filter: Low Performance",
             "type": "main",
             "index": 0
           }
@@ -618,6 +689,11 @@
             "node": "Loop Over Items",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Email Exists",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -632,15 +708,48 @@
           }
         ]
       ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Global Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Exists": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Low Performance": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields(Data Prepration)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "275fce91-f994-4f57-9e40-46d2c4308d5d",
+  "versionId": "2b22efe3-6165-4837-a5fe-54381d478dd9",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "439710dd82164804590211dad351a6e24742bc8c02a647ace24c9faf95a056ad"
